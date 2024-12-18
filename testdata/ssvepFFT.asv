@@ -1,0 +1,218 @@
+
+clear;
+clc;
+close all;
+
+file ='12hz2.txt'; 
+
+light_= textread(file,'%s');
+data_N1=length(light_);
+
+fs = 1000;          %采样率
+
+stitime = 5;        %刺激时间
+datafilter = 1;     %数据是否滤波 1 0
+fitleft = 7;        %带通滤波
+fitright = 20;      %带通滤波
+figure(1)
+lightuse = str2num (char(light_));
+plot(lightuse);
+ylabel('幅值/V', 'fontsize', 15)
+xlabel('counts','fontsize', 15);
+title('原始波形','fontsize', 15) 
+
+
+ len1 = 1000;
+%     len1 = length(y);
+  Fy1 = fft(lightuse,len1);
+  Pyy1 = abs(Fy1)*2/len1;             %FFT后纵坐标uv
+  Pyy1_new = Pyy1(1:(len1)/2+2);
+  db = 20*log10(Pyy1);
+  f1 = fs/length(Pyy1)*(0:(len1)/2+1);%FFT后横坐标Hz
+  plot(f1(1:(len1)/2+2),Pyy1(1:(len1)/2+2),f1(fftxleft+index),m,'o')
+        text(f1(fftxleft+index),m,sprintf('(%.2f,%.2f)',f1(fftxleft+index),m),...
+        'VerticalAlignment','bottom','FontSize',12) 
+
+
+%%
+part_left = 7;      % 获取局部最大值的X轴最小值 
+part_right = 16.2;  % 获取局部最大值的X轴最大值 
+x_min = 7;  % 实际显示坐标轴
+x_max = 20; % 实际显示坐标轴
+y_min = 0;  % 实际显示坐标轴
+y_max = 5;  % 实际显示坐标轴
+% %FFT
+figure(2);
+for i=1:blocks
+    subplot(4,2,i); % 在一个figure显示多个图
+    y = trial_1_data_A(:,i);
+%   FFT变换
+     len1 = 5000;
+%     len1 = length(y);
+    Fy1 = fft(y,len1);
+    Pyy1 = abs(Fy1)*2/len1;             %FFT后纵坐标uv
+    Pyy1_new = Pyy1(1:(len1)/2+2);
+    db = 20*log10(Pyy1);
+    f1 = fs/length(Pyy1)*(0:(len1)/2+1);%FFT后横坐标Hz
+
+%   获得局部最大值的位置
+%   [m,index]=max(Pyy1(13:(len1)/2+2));  
+    xleft  = part_left/fs*len1;
+    xright = part_right/fs*len1;
+    [m,index]=max(Pyy1(xleft:xright));   %获得局部最大值的位置    
+
+%   画图
+    fftxleft = len1/fs*(x_min+part_left-x_min)-1;  % 局部最大值所在点 在实际显示坐标轴位置     
+    plot(f1(1:(len1)/2+2),Pyy1(1:(len1)/2+2),f1(fftxleft+index),m,'o')
+        text(f1(fftxleft+index),m,sprintf('(%.2f,%.2f)',f1(fftxleft+index),m),...
+        'VerticalAlignment','bottom','FontSize',12) 
+    axis([x_min,x_max,y_min,y_max]);
+    set(gca,'FontSize',12)%设置坐标轴刻度字体名称，大小
+    ylabel('幅值/uV', 'fontsize', 12)
+%    xlabel('频率/Hz','fontsize', 12)
+    label_name_index = i+blocks*(chooseblock - 1);
+    name_type = hex2dec(cell2mat(label_type(label_name_index)))/1+7;
+    label_name = ['刺激',num2str(name_type),'Hz'];
+    xlabel(label_name);
+    
+end
+
+%%
+%看是否存在丢包。查看前后两个包大小是否一样，是否相差1.或者重复包
+
+packet= b1(:,(sample_num*3+4)*slaver_num-1);%157%78 //每个包的标签位置
+if slaver==1
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1));
+elseif slaver==2
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1));
+elseif slaver==3
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1));
+elseif slaver==4
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1));
+elseif slaver==5
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1));
+elseif slaver==6
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1),b1(:,(sample_num*3+4)*6-1)); 
+elseif slaver==7
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1),b1(:,(sample_num*3+4)*6-1),b1(:,(sample_num*3+4)*7-1));  
+elseif slaver==8
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1),b1(:,(sample_num*3+4)*6-1),b1(:,(sample_num*3+4)*7-1),b1(:,(sample_num*3+4)*8-1));        
+elseif slaver==9
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1),b1(:,(sample_num*3+4)*6-1),b1(:,(sample_num*3+4)*7-1),b1(:,(sample_num*3+4)*8-1),b1(:,(sample_num*3+4)*9-1)); 
+elseif slaver==10
+    ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1),b1(:,(sample_num*3+4)*4-1),b1(:,(sample_num*3+4)*5-1),b1(:,(sample_num*3+4)*6-1),b1(:,(sample_num*3+4)*7-1),b1(:,(sample_num*3+4)*8-1),b1(:,(sample_num*3+4)*9-1),b1(:,(sample_num*3+4)*10-1));
+end        
+
+% ID2=cat(2,b1(:,(sample_num*3+4)*1-1),b1(:,(sample_num*3+4)*2-1),b1(:,(sample_num*3+4)*3-1));
+% ID= b1(:,157);%2%81
+% ID_Dec=hex2dec(ID);
+packet_Dec=hex2dec(packet);
+packet_len=length(packet_Dec);
+% packet1= zeros(packet_len,1);
+packet_position=[];
+j=1;
+for i = 1:packet_len-1
+    if(packet_Dec(i+1)==packet_Dec(i))%(ID_Dec(i) ~= 6) ||
+%         if packet_Dec(i+1)~=0 && packet_Dec(i)~=255
+            packet1(j,:)=i; %packet_Dec(i+1);
+            j=j+1;
+            packet_position=[packet_position,i];
+%         end
+    elseif (packet_Dec(i+1)-packet_Dec(i)>1)
+%         if packet_Dec(i+1)~=0 && packet_Dec(i)~=255
+            packet1(j,:)=i; %packet_Dec(i+1);
+            j=j+1;
+            packet_position=[packet_position,i];
+    elseif (packet_Dec(i+1)-packet_Dec(i)<1 && packet_Dec(i+1)~=0 && packet_Dec(i)~=255)
+%         if packet_Dec(i+1)~=0 && packet_Dec(i)~=255
+            packet1(j,:)=i; %packet_Dec(i+1);
+            j=j+1;
+            packet_position=[packet_position,i];
+    end
+end
+packet_err =length(packet_position)
+LPR= packet_err/packet_len;%丢包率
+%计算是否丢包
+packet_all = mod(packet_len-(257-packet_Dec(1))-packet_Dec(packet_len),256)
+%%
+%标签误差率
+% ECG_value3=reshape(ECG_value1',N,20);
+%求每个标签包中的标签位置
+eeg_n0 = find(ECG_value1>1000);% 查非0位置
+eeg_n0_len = length(eeg_n0);
+eeg_n0_1=zeros(1,eeg_n0_len);
+j = 2;
+eeg_n0_1(1) = eeg_n0(1);
+for i=2:eeg_n0_len
+    
+    if eeg_n0(i)-eeg_n0(i-1)<5
+        eeg_n0_1(j-1) = eeg_n0(i-1);
+    else
+        eeg_n0_1(j) = eeg_n0(i);
+        j=j+1;
+    end  
+end
+eeg_n0_1 = eeg_n0_1'; 
+eeg_n0_2=find(eeg_n0_1>0);
+
+plus=1000;
+label_x = find(label_Dec>0);%找有标签的数据
+label_len = length(label_x); %标签个数
+% label_x = label_x-1;
+err=zeros(1,8);
+x=1;
+R_err=zeros(1,8);
+for i =1:label_len
+    label_position(i) = label_Dec(label_x(i));
+    label_N(i) = (label_x(i)-1)*sample_num+label_position(i);%标签位置  +1   
+    if ECG_value11(label_N(i))>plus%ECG_value3(label_packet,label_position)>1000
+        err(1)=err(1)+1;
+    elseif ECG_value11(label_N(i)+1)>plus%ECG_value3(label_packet,label_position+2)>1000
+            err(2) = err(2)+1;
+    elseif ECG_value11(label_N(i)-1)>plus%ECG_value3(label_packet,label_position+2)>1000
+            err(2) = err(2)+1;        
+    elseif ECG_value11(label_N(i)+2)>plus%ECG_value3(label_packet,label_position+3)>1000
+        err(3) = err(3)+1;
+    elseif ECG_value11(label_N(i)-2)>plus%ECG_value3(label_packet,label_position+3)>1000
+        err(3) = err(3)+1;  %可能存在-2误差      
+    elseif ECG_value11(label_N(i)+3)>plus%ECG_value3(label_packet,label_position+4)>1000
+        err(4) = err(4)+1;
+%      elseif ECG_value1(label_N(i)-3)>0%ECG_value3(label_packet,label_position+4)>1000
+%         err(4) = err(4)+1;        
+    elseif ECG_value11(label_N(i)+4)>plus%ECG_value3(label_packet,label_position+5)>1000
+        err(5) = err(5)+1;
+%     elseif ECG_value1(label_N(i)-4)>0%ECG_value3(label_packet,label_position+5)>1000
+%         err(5) = err(5)+1;        
+    elseif ECG_value11(label_N(i)+5)>plus%ECG_value3(label_packet,label_position+5)>1000
+        err(6) = err(6)+1;
+%      elseif ECG_value1(label_N(i)-5)>0%ECG_value3(label_packet,label_position+5)>1000
+%          err(6) = err(6)+1;    
+    elseif ECG_value11(label_N(i)+6)>plus%ECG_value3(label_packet,label_position+5)>1000
+        err(7) = err(7)+1;
+%      elseif ECG_value1(label_N(i)-6)>0%ECG_value3(label_packet,label_position+5)>1000
+%         err(7) = err(7)+1;   
+    elseif ECG_value11(label_N(i)+7)>plus%ECG_value3(label_packet,label_position+5)>1000
+        err(8) = err(8)+1;
+%     elseif ECG_value1(label_N(i)-7)>0%ECG_value3(label_packet,label_position+5)>1000
+%          err(8) = err(8)+1;
+    else
+        loss(x)=label_x(i); %哪一行有丢失
+        loss1(x)=label_N(i);%哪一个点有丢失
+        x=x+1;
+    end
+end
+err_sum = sum(err);
+if err_sum==label_len
+    fprintf('ok');
+end
+%标签误差
+R_err(1) = err(1)/label_len;
+R_err(2) = err(2)/label_len;
+R_err(3) = err(3)/label_len;
+R_err(4) = err(4)/label_len;
+R_err(5) = err(5)/label_len;
+R_err(6) = err(6)/label_len;
+R_err(7) = err(7)/label_len;
+R_ERR = sum(R_err);
+%%
+
