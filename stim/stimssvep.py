@@ -509,8 +509,8 @@ def SSVEPWork (FrequsStart ,FrequsEnd ,FlashTime ,Size, Num, RefreshRate):
 
 # FrequsStart与FrequsEnd相差OnceStimulateNum
 # 参数 频率，闪烁时间，框大小,次数,屏幕分辨率
-SSVEPWork(FrequsStart=11, FrequsEnd=19, FlashTime=5, Size=200, Num=1, RefreshRate=60)
-
+SSVEPWork(FrequsStart=4, FrequsEnd=12, FlashTime=5, Size=200, Num=1, RefreshRate=60)
+hu
 
 
 '''

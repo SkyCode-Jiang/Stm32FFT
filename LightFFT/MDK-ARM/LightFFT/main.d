@@ -27,11 +27,13 @@ lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_adc_ex.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 lightfft\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 lightfft\main.o: ../Core/Inc/adc.h
 lightfft\main.o: ../Core/Inc/dma.h
+lightfft\main.o: ../Core/Inc/spi.h
 lightfft\main.o: ../Core/Inc/tim.h
 lightfft\main.o: ../Core/Inc/usart.h
 lightfft\main.o: ../Core/Inc/gpio.h
@@ -39,3 +41,6 @@ lightfft\main.o: E:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 lightfft\main.o: E:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 lightfft\main.o: ..\DSP\stm32_dsp.h
 lightfft\main.o: ..\DSP\table_fft.h
+lightfft\main.o: ../Core/Inc/lcd_init.h
+lightfft\main.o: ../Core/Inc/lcd.h
+lightfft\main.o: ../Core/Inc/pic.h

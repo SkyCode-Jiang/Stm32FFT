@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,6 +31,9 @@
 #include <math.h>
 #include "stm32_dsp.h"
 #include "table_fft.h"
+#include "lcd_init.h"
+#include "lcd.h"
+#include "pic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,11 +63,14 @@ int fputc(int ch, FILE *f)
 long  lBufInArray[FFTNUM];    /* FFT IN */
 long  lBufOutArray[FFTNUM/2]; /* FFT OUT */
 long  lBufMagArray[FFTNUM/2];
-
  
 #define NUM 1024
 uint16_t lightbuffer[NUM];
 volatile uint8_t AdcConvEnd = 0;
+uint16_t MAX_Index = 0;
+uint16_t MAX_Value = 0;
+char showstr[50];
+// 0.4883
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,8 +78,10 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void GetPowerMag(void)
 {
-s16 lx,ly;
+  s16 lx,ly;
 	u32 i;
+	MAX_Value = 0;
+	MAX_Index = 0;
 	for(i=0;i<FFTNUM/2;i++)//??FFT?????????????????,???????
 	{
 		lx = (lBufOutArray[i] << 16)>>16;      //?????,??
@@ -85,11 +94,51 @@ s16 lx,ly;
 		}
         else{
            lBufMagArray[i] = (unsigned long)(Mag * 65536);
+					if(lBufMagArray[i] >= MAX_Value)
+					{
+						MAX_Value =lBufMagArray[i];
+						MAX_Index = i;
+					}
+					 
     }
-//    FFT结果输出
-//		printf("%ld\r\n", lBufMagArray[i] );
+
 	}
+	//  FFT结果输出
+  	printf("当前闪烁频率为 %.3f\r\n", (MAX_Index)*500.0/1024);	
+    sprintf(showstr, "%.3f", (MAX_Index)*500.0/1024);
 }
+
+
+//快排
+int quick_sort(long *a, int low, int high)
+{
+	int i = low;	
+	int j = high;	
+	long key = a[i]; 
+	while (i < j)
+	{
+		while(i < j && a[j] >= key)
+		{
+			j--;
+		}
+		a[i] = a[j];	
+		while(i < j && a[i] <= key)
+		{
+			i++;
+		}
+		a[j] = a[i];
+	}
+	a[i] = key;
+	if (i-1 > low) 
+	{
+		quick_sort(a, low, i-1);
+	} 
+	if (i+1 < high)
+	{
+		quick_sort(a, i+1, high);
+	} 
+	return 0;
+} 
 
 
 /* USER CODE END PFP */
@@ -112,7 +161,8 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-   HAL_Init();
+  HAL_Init();
+
   /* USER CODE BEGIN Init */
   /* USER CODE END Init */
 
@@ -129,11 +179,15 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM3_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start(&htim3);                          
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)lightbuffer, NUM); 
 	
 	printf("start test\r\n");
+	float t=0;
+  LCD_Init();//LCD初始化
+	LCD_Fill(0,0,LCD_W,LCD_H,WHITE);
 
   /* USER CODE END 2 */
 
@@ -141,6 +195,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 		while (!AdcConvEnd) ;   
 		AdcConvEnd   = 0; 
 //	  ADC结果输出
@@ -151,9 +206,25 @@ int main(void)
 	 	for (uint16_t i = 0; i < NUM; i++)
 		{
 			lBufInArray[i] = ((signed short)lightbuffer[i] - 2048) << 16 ;
-		}	
+		}	 
 		cr4_fft_1024_stm32(lBufOutArray,lBufInArray, FFTNUM);
+
 	  GetPowerMag();
+//	//5 - 10Hz 0.4883 一共12个点   屏幕太小了 显示不全
+//  	for(int i=10;i<21;i++)
+//	 {
+//		u16 dx = 128 / 12;
+//		u16 x1 = dx * (i-10);
+//		u16 x2 = x1 + dx;
+//		LCD_DrawLine(x1,lBufMagArray[i]/8,x2,lBufMagArray[i+1]/8,RED);
+//   }
+//	LCD_ShowString(0,100,"5  6  7  8  9 10",RED,WHITE,16,0);
+      LCD_ShowString(10,20,"Stim Freq",RED,WHITE,16,0);
+		  //LCD_ShowFloatNum1(72,50,(MAX_Index-1)*500.0/1024,3,RED,WHITE,16);
+		 LCD_ShowString(50,70,showstr,RED,WHITE,16,0);
+//    FFT结果输出
+//		printf("%ld\r\n", lBufMagArray[i] );	
+
 
     /* USER CODE END WHILE */
 
